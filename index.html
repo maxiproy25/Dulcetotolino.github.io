@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dulce Totolino - Pastelería Artesanal</title>
+    <title>Dulce Totolino - Pastelería Artesanal Premium</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
         :root {
             --color-primario: #ff6b9d;
@@ -14,6 +15,7 @@
             --color-blanco: #ffffff;
             --color-exito: #4caf50;
             --color-error: #f44336;
+            --color-admin: #6a1b9a;
             --hero-image: url('https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1089&q=80');
         }
         
@@ -42,6 +44,23 @@
             transition: all 0.3s ease;
         }
         
+        .admin-header {
+            background: linear-gradient(135deg, var(--color-admin), #8e44ad);
+        }
+        
+        .admin-indicator {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
         .container {
             width: 90%;
             max-width: 1200px;
@@ -54,6 +73,7 @@
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            position: relative;
         }
         
         .logo {
@@ -62,6 +82,10 @@
             gap: 10px;
             font-size: 1.8rem;
             font-weight: 700;
+        }
+        
+        .logo img {
+            height: 40px;
         }
         
         .mobile-menu-btn {
@@ -105,6 +129,12 @@
             margin-bottom: 40px;
             border-radius: 0 0 20px 20px;
             transition: all 0.5s ease;
+            position: relative;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 2;
         }
         
         .hero h1 {
@@ -147,6 +177,11 @@
         .btn-secondary {
             background-color: var(--color-blanco);
             color: var(--color-texto);
+        }
+        
+        .btn-admin {
+            background-color: var(--color-admin);
+            margin-top: 20px;
         }
         
         .section-title {
@@ -287,6 +322,33 @@
             color: #ccc;
         }
         
+        .admin-only {
+            position: relative;
+        }
+        
+        .admin-only:after {
+            content: "Solo Administrador";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 15px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        .admin-only:hover:after {
+            opacity: 1;
+        }
+        
         .comments-section {
             background-color: var(--color-blanco);
             padding: 40px;
@@ -387,6 +449,7 @@
             border-radius: 20px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             margin: 40px 0;
+            position: relative;
         }
         
         .admin-controls {
@@ -412,7 +475,7 @@
         
         .admin-card i {
             font-size: 2.5rem;
-            color: var(--color-primario);
+            color: var(--color-admin);
             margin-bottom: 15px;
         }
         
@@ -480,6 +543,22 @@
         .social-icon-option:hover {
             transform: scale(1.1);
             background: #e0e0e0;
+        }
+        
+        .map-section {
+            background-color: var(--color-blanco);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin: 50px 0;
+        }
+        
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         footer {
@@ -594,6 +673,10 @@
         
         .notification.error {
             background-color: var(--color-error);
+        }
+        
+        .notification.warning {
+            background-color: #ff9800;
         }
         
         .modal {
@@ -726,7 +809,7 @@
 </head>
 <body>
     <!-- Header -->
-    <header>
+    <header id="mainHeader">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
@@ -741,6 +824,7 @@
                         <li><a href="#inicio">Inicio</a></li>
                         <li><a href="#galeria">Galería</a></li>
                         <li><a href="#qr">Código QR</a></li>
+                        <li><a href="#mapa">Ubicación</a></li>
                         <li><a href="#comentarios">Comentarios</a></li>
                         <li><a href="#contacto">Contacto</a></li>
                     </ul>
@@ -752,9 +836,12 @@
     <!-- Hero Section -->
     <section class="hero" id="inicio">
         <div class="container">
-            <h1>Tortas Artesanales Hechas con Amor</h1>
-            <p>Diseños personalizados para tus momentos especiales, elaborados con los mejores ingredientes</p>
-            <a href="#galeria" class="btn">Ver Galería</a>
+            <div class="hero-content">
+                <h1>Tortas Artesanales Hechas con Amor</h1>
+                <p>Diseños personalizados para tus momentos especiales, elaborados con los mejores ingredientes</p>
+                <a href="#galeria" class="btn">Ver Galería</a>
+                <a href="#contacto" class="btn btn-secondary">Hacer Pedido</a>
+            </div>
         </div>
     </section>
 
@@ -773,12 +860,20 @@
             <p>Escanéa este código para acceder a nuestra página desde tu celular</p>
             
             <div class="qr-container">
-                <div class="qr-placeholder" id="qrPlaceholder" onclick="document.getElementById('qrUpload').click()">
+                <div class="qr-placeholder" id="qrPlaceholder">
                     <i class="fas fa-qrcode"></i>
                 </div>
-                <p>Haz clic para cargar tu propio código QR</p>
-                <input type="file" id="qrUpload" accept="image/*" style="display: none;">
+                <p id="qrInstruction">Contáctanos para obtener nuestro código QR</p>
             </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section" id="mapa">
+        <div class="container">
+            <h2 class="section-title">Nuestra Ubicación</h2>
+            <p>Visítanos en nuestro local para probar nuestras deliciosas creaciones</p>
+            <div id="map"></div>
         </div>
     </section>
 
@@ -827,6 +922,7 @@
             
             <div class="admin-panel" id="adminPanel">
                 <h2 class="section-title">Panel de Administración</h2>
+                <button class="btn btn-admin" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Cerrar Sesión</button>
                 
                 <div class="admin-controls">
                     <div class="admin-card" onclick="openModal('photoModal')">
@@ -877,7 +973,7 @@
                         <li><a href="#inicio"><i class="fas fa-home"></i> Inicio</a></li>
                         <li><a href="#galeria"><i class="fas fa-images"></i> Galería</a></li>
                         <li><a href="#qr"><i class="fas fa-qrcode"></i> Código QR</a></li>
-                        <li><a href="#comentarios"><i class="fas fa-comment"></i> Comentarios</a></li>
+                        <li><a href="#mapa"><i class="fas fa-map-marker-alt"></i> Ubicación</a></li>
                     </ul>
                 </div>
                 
@@ -1010,7 +1106,7 @@
             
             <div class="form-group">
                 <label>Subir código QR</label>
-                <div class="qr-placeholder" style="height: 200px; cursor: pointer;" onclick="document.getElementById('qrModalUpload').click()">
+                <div class="gallery-item" style="height: 200px; cursor: pointer;" onclick="document.getElementById('qrModalUpload').click()">
                     <div class="add-photo-btn">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p>Haz clic para subir tu código QR</p>
@@ -1025,6 +1121,7 @@
 
     <div class="notification" id="notification"></div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Datos iniciales
         let galleryItems = [
@@ -1039,6 +1136,12 @@
                 title: "Torta de Frutas Frescas",
                 date: "2023-10-10",
                 image: "https://images.unsplash.com/photo-1558326567-98ae2405596b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1086&q=80"
+            },
+            {
+                id: 3,
+                title: "Torta de Bodas",
+                date: "2023-10-05",
+                image: "https://images.unsplash.com/photo-1524351199678-941a58a3df50?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1171&q=80"
             }
         ];
         
@@ -1054,6 +1157,12 @@
                 name: "Carlos Martínez",
                 date: "2023-10-12",
                 content: "Excelente servicio y la torta superó nuestras expectativas. Definitivamente volveré a pedir."
+            },
+            {
+                id: 3,
+                name: "Ana Rodríguez",
+                date: "2023-10-08",
+                content: "La atención personalizada y la calidad de los ingredientes hacen la diferencia. ¡Recomendado 100%!"
             }
         ];
         
@@ -1066,17 +1175,78 @@
             renderGallery();
             renderComments();
             setupEventListeners();
+            initMap();
             
             // Cargar datos guardados
             loadSavedData();
             
             // Verificar si ya está logueado
             if (localStorage.getItem('dulceTotolinoAdmin') === 'true') {
-                isAdmin = true;
-                document.getElementById('adminPanel').style.display = 'block';
-                document.getElementById('adminLogin').style.display = 'none';
+                loginAdmin();
             }
         });
+        
+        function loginAdmin() {
+            isAdmin = true;
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminLogin').style.display = 'none';
+            document.getElementById('mainHeader').classList.add('admin-header');
+            
+            // Mostrar indicador de admin
+            const adminIndicator = document.createElement('div');
+            adminIndicator.className = 'admin-indicator';
+            adminIndicator.innerHTML = '<i class="fas fa-user-shield"></i> Modo Administrador';
+            document.querySelector('.header-content').appendChild(adminIndicator);
+            
+            // Activar funcionalidad QR para admin
+            document.getElementById('qrPlaceholder').onclick = function() {
+                document.getElementById('qrUpload').click();
+            };
+            document.getElementById('qrInstruction').textContent = "Haz clic para cargar tu propio código QR";
+        }
+        
+        function logoutAdmin() {
+            isAdmin = false;
+            localStorage.removeItem('dulceTotolinoAdmin');
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminLogin').style.display = 'block';
+            document.getElementById('mainHeader').classList.remove('admin-header');
+            
+            // Remover indicador de admin
+            const indicator = document.querySelector('.admin-indicator');
+            if (indicator) indicator.remove();
+            
+            // Desactivar funcionalidad QR
+            document.getElementById('qrPlaceholder').onclick = null;
+            document.getElementById('qrInstruction').textContent = "Contáctanos para obtener nuestro código QR";
+            
+            // Recargar galería sin opciones de admin
+            renderGallery();
+            renderComments();
+            
+            showNotification('Sesión cerrada exitosamente', 'success');
+        }
+        
+        function initMap() {
+            // Coordenadas de ejemplo (Calle Dulce 123, Ciudad)
+            const map = L.map('map').setView([-34.603722, -58.381592], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Marcador personalizado
+            const cakeIcon = L.icon({
+                iconUrl: 'https://cdn-icons-png.flaticon.com/512/890/890818.png',
+                iconSize: [40, 40],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40]
+            });
+            
+            L.marker([-34.603722, -58.381592], {icon: cakeIcon}).addTo(map)
+                .bindPopup('Dulce Totolino<br>Calle Dulce 123, Ciudad')
+                .openPopup();
+        }
         
         function loadSavedData() {
             // Cargar galería
@@ -1129,16 +1299,16 @@
                 const password = document.getElementById('adminPassword').value;
                 
                 if (username === 'admin' && password === 'dulce123') {
-                    isAdmin = true;
-                    document.getElementById('adminPanel').style.display = 'block';
-                    document.getElementById('adminLogin').style.display = 'none';
                     localStorage.setItem('dulceTotolinoAdmin', 'true');
+                    loginAdmin();
                     showNotification('Inicio de sesión exitoso', 'success');
-                    renderGallery();
                 } else {
                     showNotification('Usuario o contraseña incorrectos', 'error');
                 }
             });
+            
+            // Botón cerrar sesión
+            document.getElementById('logoutBtn').addEventListener('click', logoutAdmin);
             
             // Enviar comentario
             document.getElementById('submitComment').addEventListener('click', function() {
@@ -1177,7 +1347,7 @@
                 }
             });
             
-            // Subir QR desde la sección principal
+            // Subir QR desde la sección principal (solo admin)
             document.getElementById('qrUpload').addEventListener('change', function(e) {
                 if (e.target.files && e.target.files[0]) {
                     const reader = new FileReader();
@@ -1270,158 +1440,4 @@
                         <span class="comment-author">${comment.name}</span>
                         <span class="comment-date">${formatDate(comment.date)}</span>
                     </div>
-                    <div class="comment-content">${comment.content}</div>
-                    <button class="delete-comment" onclick="deleteComment(${comment.id})"><i class="fas fa-trash"></i></button>
-                `;
-                adminCommentsList.appendChild(commentEl);
-            });
-        }
-        
-        function addNewPhoto() {
-            const title = document.getElementById('photoTitle').value.trim();
-            const date = document.getElementById('photoDate').value;
-            const fileInput = document.getElementById('photoUpload');
-            
-            if (!title || !date || !fileInput.files[0]) {
-                showNotification('Por favor completa todos los campos y sube una foto', 'error');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const newItem = {
-                    id: Date.now(),
-                    title: title,
-                    date: date,
-                    image: event.target.result
-                };
-                
-                galleryItems.push(newItem);
-                renderGallery();
-                closeModal('photoModal');
-                showNotification('Foto agregada exitosamente', 'success');
-                
-                // Guardar galería
-                localStorage.setItem('dulceGallery', JSON.stringify(galleryItems));
-                
-                // Reset form
-                document.getElementById('photoTitle').value = '';
-                document.getElementById('photoDate').value = '';
-                fileInput.value = '';
-            };
-            reader.readAsDataURL(fileInput.files[0]);
-        }
-        
-        function deletePhoto(id) {
-            galleryItems = galleryItems.filter(item => item.id !== id);
-            renderGallery();
-            showNotification('Foto eliminada', 'success');
-            localStorage.setItem('dulceGallery', JSON.stringify(galleryItems));
-        }
-        
-        function deleteComment(id) {
-            comments = comments.filter(comment => comment.id !== id);
-            renderComments();
-            
-            if (document.getElementById('commentsModal').style.display === 'flex') {
-                renderAdminComments();
-            }
-            
-            showNotification('Comentario eliminado', 'success');
-            localStorage.setItem('dulceComments', JSON.stringify(comments));
-        }
-        
-        function showCommentsManagement() {
-            renderAdminComments();
-            openModal('commentsModal');
-        }
-        
-        function setColor(type, color) {
-            document.documentElement.style.setProperty(`--color-${type}`, color);
-        }
-        
-        function setSocialIcon(type, iconClass) {
-            const socialLinks = document.getElementById('socialLinks');
-            let found = false;
-            
-            // Buscar si ya existe este tipo de icono
-            for (let i = 0; i < socialLinks.children.length; i++) {
-                const link = socialLinks.children[i];
-                if (link.querySelector('i').className.includes(type)) {
-                    link.querySelector('i').className = iconClass;
-                    found = true;
-                    break;
-                }
-            }
-            
-            // Si no existe, agregar uno nuevo
-            if (!found) {
-                const newLink = document.createElement('a');
-                newLink.href = '#';
-                newLink.target = '_blank';
-                newLink.innerHTML = `<i class="${iconClass}"></i>`;
-                socialLinks.appendChild(newLink);
-            }
-            
-            showNotification('Icono actualizado', 'success');
-        }
-        
-        function saveCustomization() {
-            // Guardar colores
-            const colors = {
-                primario: getComputedStyle(document.documentElement).getPropertyValue('--color-primario').trim(),
-                secundario: getComputedStyle(document.documentElement).getPropertyValue('--color-secundario').trim(),
-                fondo: getComputedStyle(document.documentElement).getPropertyValue('--color-fondo').trim(),
-                texto: getComputedStyle(document.documentElement).getPropertyValue('--color-texto').trim(),
-                blanco: getComputedStyle(document.documentElement).getPropertyValue('--color-blanco').trim()
-            };
-            localStorage.setItem('dulceColors', JSON.stringify(colors));
-            
-            // Guardar fondo
-            const bgPreview = document.getElementById('bgPreview').style.backgroundImage;
-            if (bgPreview && bgPreview !== 'none') {
-                document.documentElement.style.setProperty('--hero-image', bgPreview);
-                localStorage.setItem('dulceBG', bgPreview.replace('url("', '').replace('")', ''));
-            }
-            
-            showNotification('Personalización guardada', 'success');
-        }
-        
-        function saveQRConfig() {
-            qrLink = document.getElementById('qrLink').value;
-            if (qrLink) {
-                localStorage.setItem('dulceQRLink', qrLink);
-                showNotification('Enlace QR guardado', 'success');
-            }
-            closeModal('qrModal');
-        }
-        
-        function openModal(modalId) {
-            document.getElementById(modalId).style.display = 'flex';
-            if (modalId === 'qrModal') {
-                document.getElementById('qrLink').value = qrLink || window.location.href;
-            }
-        }
-        
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        function showNotification(message, type) {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.className = `notification ${type}`;
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-        
-        function formatDate(dateString) {
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            return new Date(dateString).toLocaleDateString('es-ES', options);
-        }
-    </script>
-</body>
-</html>
+                    <div class="comment-content">${comment
